@@ -1,0 +1,75 @@
+//README: this program pulses two stepper drivers based on user input from a 3-way switch and a potentiometer.
+//  Switch up pos runs motor1 cw,down pos runs motor1 ccw, center pos runs both motors at same speed in same direction as before.
+//  Potentiometer controls speed from 0-5kHz. 
+//Wiring: see pin number variables below.
+//  Pot requires 5V,GND, and signal with 10kOhm from signal to ground.
+//  Switch requires common GND and two signals using built-in pull-up resistors.
+
+int dir1=2;
+int clk1=3;
+int dir2=4;
+int clk2=5;
+int sw1=8;
+int sw2=9;
+int pot1=A0;
+
+//motor direction initial conditions [MAY CHANGE DEPENDING ON WIRING]
+int dir1_init=0;
+int dir2_init=0;
+
+void setup() {
+  //Serial.begin(9600);
+  pinMode(dir1,OUTPUT);
+  pinMode(clk1,OUTPUT);
+  pinMode(dir2,OUTPUT);
+  pinMode(clk2,OUTPUT);
+  pinMode(sw1,INPUT_PULLUP);
+  pinMode(sw2,INPUT_PULLUP);
+  pinMode(pot1,INPUT);
+
+  digitalWrite(dir1,dir1_init);
+  digitalWrite(dir2,dir2_init);
+}
+
+int steptime;
+void loop() {
+  steptime=analogRead(pot1)+200;
+  if (analogRead(pot1)>1000){
+    delay(10);
+  }
+  else if (digitalRead(sw1)==0){
+    //reverse direction
+    digitalWrite(dir1,1-dir1_init);
+    digitalWrite(dir2,1-dir2_init);
+    //run motor1
+    for (int i=0;i<100;i++){
+      digitalWrite(clk1,HIGH);
+      delayMicroseconds(steptime);
+      digitalWrite(clk1,LOW);
+      delayMicroseconds(steptime);
+    }
+  }
+  else if (digitalRead(sw2)==0){ //run
+    //initial direction
+    digitalWrite(dir1,dir1_init);
+    digitalWrite(dir2,dir2_init);
+    //run motor1
+    for (int i=0;i<100;i++){
+      digitalWrite(clk1,HIGH);
+      delayMicroseconds(steptime);
+      digitalWrite(clk1,LOW);
+      delayMicroseconds(steptime);     
+    }
+  }
+  else { //run both simultaneously
+    //run motor1 and motor2
+    for (int i=0;i<100;i++){
+      digitalWrite(clk1,HIGH);
+      digitalWrite(clk2,HIGH);
+      delayMicroseconds(steptime);
+      digitalWrite(clk1,LOW);
+      digitalWrite(clk2,LOW);
+      delayMicroseconds(steptime);
+   }
+  }
+}
